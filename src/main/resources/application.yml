@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: activerecall
+  data:
+    mongodb:
+      uri: mongodb+srv://emailtoajai:dddJitpUEziHMnoC@activerecall.bw4ty.mongodb.net/?retryWrites=true&w=majority&appName=ActiveRecall
+      database: activerecalldb
+      auto-index-creation: true
