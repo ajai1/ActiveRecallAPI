@@ -29,25 +29,25 @@ public class DeckService {
     CardRepository cardRepository;
 
 
+
+
     public ResponseEntity<DeckEntity> createDeck(DeckEntity deck){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(!authentication.isAuthenticated()) return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-
         UserEntity user = userService.findByUsername(authentication.getName());
         if(user == null) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        //Set user Id to the newly created deck
+        deck.setUserId(user.getId());
         DeckEntity savedDeck = deckRepository.save(deck);
-        user.getDecks().add(savedDeck);
-        userService.updateUser(user);
         return new ResponseEntity<>(savedDeck, HttpStatus.CREATED);
     }
 
     public ResponseEntity<List<DeckEntity>> getAllDecks(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(!authentication.isAuthenticated()) return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-
         UserEntity user = userService.findByUsername(authentication.getName());
         if(user == null) return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
-        List<DeckEntity> allDecksForUser = user.getDecks();
+        List<DeckEntity> allDecksForUser = deckRepository.findByUserId(user.getId());
         return new ResponseEntity<List<DeckEntity>>(allDecksForUser, HttpStatus.FOUND);
     }
 
@@ -61,13 +61,23 @@ public class DeckService {
         if(!authentication.isAuthenticated()) return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         UserEntity user = userService.findByUsername(authentication.getName());
         if(user == null) return null;
-        if(user.getDecks().size() == 0) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        for(DeckEntity deck : user.getDecks()){
-            if(deck !=null && deck.getDeckname().equals(deckname)){
-                return new ResponseEntity<>(deck, HttpStatus.FOUND);
-            }
+        Optional<DeckEntity> deckOptional = deckRepository.findByUserIdAndDeckname(user.getId(), deckname);
+        if(deckOptional.isPresent()){
+            return new ResponseEntity<>(deckOptional.get(), HttpStatus.FOUND);
+        }else{
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+
+    public ResponseEntity<DeckEntity> findDeckById(String deckId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(!authentication.isAuthenticated()) return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        Optional<DeckEntity> deck = deckRepository.findById(deckId);
+        if(deck.isPresent()){
+            return new ResponseEntity<>(deck.get(), HttpStatus.FOUND);
+        }else{
+            return  new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 
     public ResponseEntity<Boolean> resetCardsIntervalAndRepetitions(String deckname){
@@ -75,7 +85,8 @@ public class DeckService {
         if(!authentication.isAuthenticated()) return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
         DeckEntity deck = findDeckByName(deckname).getBody();
         if(deck == null) return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
-        for(CardEntity cardEntity : deck.getCards()){
+        List<CardEntity> cardEntities = cardRepository.findByDeckId(deck.getId());
+        for(CardEntity cardEntity : cardEntities){
             cardEntity.setRepetition(0);
             cardEntity.setInterval(1);
             cardRepository.save(cardEntity);
@@ -98,11 +109,9 @@ public class DeckService {
     public ResponseEntity<String> deleteDeck(DeckEntity deck) {
         Optional<DeckEntity> deckFromDB = deckRepository.findById(deck.getId());
         if(deckFromDB.isPresent()){
-            for(CardEntity card : deckFromDB.get().getCards()){
-                cardRepository.deleteById(card.getId());
-            }
+            cardRepository.deleteByDeckId(deckFromDB.get().getId());
             deckRepository.deleteById(deck.getId());
-            return new ResponseEntity<>("Deck deleted", HttpStatus.OK);
+            return new ResponseEntity<>("Deck and cards deleted", HttpStatus.OK);
         }else{
             return new ResponseEntity<>("Deck Id not found", HttpStatus.NOT_FOUND);
         }

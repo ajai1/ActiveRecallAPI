@@ -15,8 +15,18 @@ public class DeckEntity {
     @Indexed(unique = true)
     @NonNull
     private String deckname;
-    @DBRef
-    private List<CardEntity> cards = new ArrayList<>();
+    //@DBRef(lazy = true)
+    //private List<CardEntity> cards = new ArrayList<>();
+
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(@NonNull String userId) {
+        this.userId = userId;
+    }
 
     public String getId() {
         return id;
@@ -42,11 +52,11 @@ public class DeckEntity {
         this.deckname = deckname;
     }
 
-    public List<CardEntity> getCards() {
+    /*public List<CardEntity> getCards() {
         return cards;
     }
 
     public void setCards(List<CardEntity> cards) {
         this.cards = cards;
-    }
+    }*/
 }

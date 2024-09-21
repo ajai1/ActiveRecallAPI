@@ -7,5 +7,8 @@ import java.util.List;
 
 public interface CardRepository extends MongoRepository<CardEntity, String> {
 
-    //List<CardEntity> findByDeckid(String deckid);
+    List<CardEntity> findByDeckId(String deckId);
+
+    // Custom method to delete all cards by deckId
+    void deleteByDeckId(String deckId);
 }

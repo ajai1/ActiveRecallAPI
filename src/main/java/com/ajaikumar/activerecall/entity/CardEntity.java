@@ -1,5 +1,6 @@
 package com.ajaikumar.activerecall.entity;
 
+import com.mongodb.lang.NonNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,6 +16,16 @@ public class CardEntity {
     private double easeFactor;
     private int repetition;
     private String canvas;
+
+    private String deckId;
+
+    public String getDeckId() {
+        return deckId;
+    }
+
+    public void setDeckId(@NonNull String deckId) {
+        this.deckId = deckId;
+    }
 
     public void setCanvas(String canvas) {
         this.canvas = canvas;

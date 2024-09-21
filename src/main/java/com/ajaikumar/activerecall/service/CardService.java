@@ -33,9 +33,8 @@ public class CardService {
         if(!authentication.isAuthenticated()) return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         DeckEntity deckEntity = deckService.findDeckByName(deckname).getBody();
         if(deckEntity != null){
+            cardEntity.setDeckId(deckEntity.getId());
             CardEntity savedCard = cardRepository.save(cardEntity);
-            deckEntity.getCards().add(savedCard);
-            deckService.updateDecks(deckEntity);
             return new ResponseEntity<>(savedCard, HttpStatus.CREATED);
         }else{
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -62,7 +61,8 @@ public class CardService {
     public List<CardEntity> getAllCardsFromDeck (String deckname){
         DeckEntity deckEntity = deckService.findDeckByName(deckname).getBody();
         if(deckEntity != null){
-            return  deckEntity.getCards();
+            List<CardEntity> allCardsFromDeck = cardRepository.findByDeckId(deckEntity.getId());
+            return allCardsFromDeck;
         }else{
             return new ArrayList<>();
         }
@@ -71,9 +71,6 @@ public class CardService {
     public boolean deleteCard(CardEntity cardEntity, String deckname){
         DeckEntity deckEntity = deckService.findDeckByName(deckname).getBody();
         if(deckEntity != null){
-            List<CardEntity> remainingCards = deckEntity.getCards().stream().filter(card -> !card.getId().equals(cardEntity.getId())).collect(Collectors.toList());
-            deckEntity.setCards(remainingCards);
-            deckRepository.save(deckEntity);
             cardRepository.deleteById(cardEntity.getId());
             return true;
         }else{

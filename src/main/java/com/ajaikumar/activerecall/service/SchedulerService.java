@@ -5,10 +5,12 @@ import com.ajaikumar.activerecall.entity.DeckEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -40,7 +42,11 @@ public class SchedulerService {
             System.out.println("No such Deck Found !!!");
             return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
         }
-        executorService.schedule(() -> runResettingIntervals(authentication.getName(), deckname, deck), 10, TimeUnit.SECONDS);
+
+        ScheduledExecutorService executor = new DelegatingSecurityContextScheduledExecutorService(executorService);
+
+
+        executor.schedule(() -> runResettingIntervals(authentication.getName(), deckname, deck), 10, TimeUnit.SECONDS);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
@@ -49,7 +55,9 @@ public class SchedulerService {
         try {
             // Simulate the scheduled job running for the userName + deckName
             System.out.println("Job for user: " + username + ", deck: " + deckname + " started...");
-            for(CardEntity cardEntity : deck.getCards()){
+            List<CardEntity> cardEntities = cardService.getAllCardsFromDeck(deckname);
+            System.out.println("CARD ENTITIES" + cardEntities);
+            for(CardEntity cardEntity : cardEntities){
                 cardEntity.setRepetition(0);
                 cardEntity.setInterval(1);
                 cardService.updateCard(cardEntity);

@@ -39,6 +39,11 @@ public class DeckController {
         return new ResponseEntity<>(deckResponse, HttpStatus.FOUND);
     }
 
+    @GetMapping("/find/{deckId}")
+    public ResponseEntity<DeckEntity> findDeck(@PathVariable String deckId){
+        return deckService.findDeckById(deckId);
+    }
+
     @PostMapping
     public ResponseEntity<DeckEntity> createDeck(@RequestBody DeckEntity deck){
         return deckService.createDeck(deck);

@@ -20,16 +20,16 @@ public class UserEntity {
     private String password;
     private String email;
 
-    @DBRef
-    private List<DeckEntity> decks = new ArrayList<>();
+    //@DBRef(lazy = true)
+    //private List<DeckEntity> decks = new ArrayList<>();
 
-    public List<DeckEntity> getDecks() {
+/*    public List<DeckEntity> getDecks() {
         return decks;
     }
 
     public void setDecks(List<DeckEntity> decks) {
         this.decks = decks;
-    }
+    }*/
 
     public String getId() {
         return id;
