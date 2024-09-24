@@ -6,13 +6,3 @@ spring:
       uri: mongodb+srv://emailtoajai:dddJitpUEziHMnoC@activerecall.bw4ty.mongodb.net/?retryWrites=true&w=majority&appName=ActiveRecall
       database: activerecalldb
       auto-index-creation: true
-
-logging:
-  level:
-    org:
-      springframework:
-        data:
-          mongodb:
-            core:
-              MongoTemplate: DEBUG
-          driver: DEBUG
